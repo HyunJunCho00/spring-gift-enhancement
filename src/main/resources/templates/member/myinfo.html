@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
+        .container { width: 320px; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .info-group { margin-bottom: 15px; }
+        .info-label { font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+        .info-data { padding: 10px; background-color: #f9f9f9; border: 1px solid #eee; border-radius: 4px; word-wrap: break-word; }
+        button { width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        button:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>내 정보</h2>
+    <div class="info-group">
+        <div class="info-label">ID</div>
+        <div id="member-id" class="info-data">로딩 중...</div>
+    </div>
+    <div class="info-group">
+        <div class="info-label">Email</div>
+        <div id="member-email" class="info-data">로딩 중...</div>
+    </div>
+    <button onclick="logout()">로그아웃</button>
+</div>
+<script>
+    window.onload = async function() {
+        const token = localStorage.getItem('accessToken');
+
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/members/me', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const memberInfo = await response.json();
+                document.getElementById('member-id').textContent = memberInfo.id;
+                document.getElementById('member-email').textContent = memberInfo.email;
+            } else {
+                alert('세션이 만료되었거나 토큰이 유효하지 않습니다. 다시 로그인해주세요.');
+                localStorage.removeItem('accessToken');
+
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Error fetching member info:', error);
+            alert('정보를 가져오는 중 오류가 발생했습니다.');
+        }
+    };
+
+    function logout() {
+        localStorage.removeItem('accessToken');
+        alert('로그아웃 되었습니다.');
+        window.location.href = '/login';
+    }
+</script>
+</body>
+</html>
