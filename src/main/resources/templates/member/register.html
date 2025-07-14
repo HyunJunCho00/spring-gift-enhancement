@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; margin: 0;}
+        .container { width: 320px; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        input { width: 95%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        p { text-align: center; }
+        .error { color: red; font-size: 0.9em; text-align: center; height: 1.2em;}
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>회원가입</h2>
+    <form id="registerForm">
+        <input type="email" id="email" placeholder="이메일" required>
+        <input type="password" id="password" placeholder="비밀번호" required>
+        <p id="errorMessage" class="error"></p>
+        <button type="submit">가입하기</button>
+    </form>
+    <p>이미 회원이신가요? <a href="/login">로그인</a></p>
+</div>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = '';
+        try {
+            const response = await fetch('/api/members/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
+            }
+            localStorage.setItem('accessToken', data.token);
+            alert('회원가입 성공! 로그인 페이지로 이동합니다.');
+            window.location.href = '/login';
+        } catch (error) {
+            errorMessage.textContent = error.message;
+        }
+    });
+</script>
+</body>
+</html>

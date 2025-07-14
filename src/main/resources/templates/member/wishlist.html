@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>내 위시리스트</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; color: #333; }
+        h1, h2 { text-align: center; color: #2c3e50; }
+        .wish-form { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .wish-form input { width: calc(100% - 90px); padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .wish-form button { width: 80px; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .wish-list { list-style: none; padding: 0; }
+        .wish-item { display: flex; align-items: center; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        .wish-item img { width: 60px; height: 60px; border-radius: 4px; margin-right: 15px; }
+        .wish-item-info { flex-grow: 1; }
+        .wish-item-info strong { font-size: 1.1em; }
+        .wish-item-delete { padding: 8px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #logout-button { display: block; width: 100px; margin: 30px auto 0; padding: 10px; background-color: #3498db; color: white; text-align: center; border-radius: 4px; cursor: pointer; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<h1>내 위시리스트</h1>
+
+<div class="wish-form">
+    <h2>새 상품 추가</h2>
+    <form id="add-wish-form">
+        <input type="number" id="product-id" placeholder="상품 ID를 입력하세요" required>
+        <button type="submit">추가</button>
+    </form>
+</div>
+
+<ul id="wish-list" class="wish-list">
+</ul>
+
+<a id="logout-button" href="#">로그아웃</a>
+
+<script>
+    const token = localStorage.getItem('accessToken');
+    const wishListElement = document.getElementById('wish-list');
+
+    // 페이지 로드 시 실행
+    window.onload = function() {
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+        }
+        loadWishes();
+    };
+
+    async function loadWishes() {
+        try {
+            const response = await fetch('/api/wishes', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('위시리스트를 불러오는데 실패했습니다.');
+
+            const wishes = await response.json();
+            wishListElement.innerHTML = ''; // 기존 목록 초기화
+
+            if (wishes.length === 0) {
+                wishListElement.innerHTML = '<p>위시리스트가 비어있습니다.</p>';
+                return;
+            }
+
+            wishes.forEach(wish => {
+                const item = document.createElement('li');
+                item.className = 'wish-item';
+                item.innerHTML = `
+                    <img src="${wish.productImageUrl}" alt="${wish.productName}" onerror="this.src='[https://placehold.co/60x60/eee/ccc?text=Image](https://placehold.co/60x60/eee/ccc?text=Image)'">
+                    <div class="wish-item-info">
+                        <strong>${wish.productName}</strong>
+                        <p>${wish.productPrice.toLocaleString()}원</p>
+                    </div>
+                    <button class="wish-item-delete" data-wish-id="${wish.wishId}">삭제</button>
+                `;
+                wishListElement.appendChild(item);
+            });
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    document.getElementById('add-wish-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const productId = document.getElementById('product-id').value;
+        if (!productId) return;
+
+        try {
+            const response = await fetch('/api/wishes', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: Number(productId) })
+            });
+
+            if (response.status === 201) {
+                alert('상품이 위시리스트에 추가되었습니다.');
+                document.getElementById('product-id').value = '';
+                loadWishes();
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '상품 추가에 실패했습니다.');
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+    wishListElement.addEventListener('click', async function(e) {
+        if (e.target && e.target.classList.contains('wish-item-delete')) {
+            const wishId = e.target.dataset.wishId;
+            if (!confirm('정말로 이 상품을 삭제하시겠습니까?')) return;
+
+            try {
+                const response = await fetch(`/api/wishes/${wishId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.status === 204) {
+                    alert('상품이 삭제되었습니다.');
+                    loadWishes();
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+    });
+    document.getElementById('logout-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.removeItem('accessToken');
+        alert('로그아웃 되었습니다.');
+        window.location.href = '/login';
+    });
+</script>
+</body>
+</html>
