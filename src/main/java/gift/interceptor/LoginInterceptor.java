@@ -28,7 +28,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         String token = authHeader.substring(BEARER_PREFIX.length());
         try {
             jwtTokenProvider.validateToken(token);
-            Long memberId=jwtTokenProvider.getSubject(token);
+            Long memberId = jwtTokenProvider.getSubject(token);
             request.setAttribute("memberId", memberId);
             return true;
         } catch (JwtException | NumberFormatException e) {
