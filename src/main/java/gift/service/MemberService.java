@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -24,8 +24,9 @@ public class MemberService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional
     public TokenResponse register(RegisterRequestDto request) {
-        memberRepository.findByEmail(request.getEmail()).ifPresent(m-> {
+        memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
             throw new EmailAlreadyExistsException("이미 가입된 이메일입니다: " + request.getEmail());
         });
 
@@ -37,7 +38,6 @@ public class MemberService {
         return new TokenResponse(token);
     }
 
-    @Transactional(readOnly = true)
     public TokenResponse login(LoginRequestDto request) {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new LoginFailedException("가입되지 않은 이메일입니다."));
@@ -49,10 +49,9 @@ public class MemberService {
         return new TokenResponse(token);
     }
 
-    @Transactional(readOnly = true)
     public MemberProfileDto findMemberProfileById(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + memberId));
-        return new MemberProfileDto(member.getId(),member.getEmail());
+        return new MemberProfileDto(member.getId(), member.getEmail());
     }
 }

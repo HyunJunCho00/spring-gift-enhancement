@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ProductService {
     private final ProductRepository repository;
 
@@ -33,17 +34,16 @@ public class ProductService {
     }
 
     @Transactional
-    public Product update(Long id,UpdateProductRequestDto dto) {
-        Product productUpdate=getById(id);
+    public Product update(Long id, UpdateProductRequestDto dto) {
+        Product productUpdate = getById(id);
         productUpdate.setName(dto.getName());
         productUpdate.setPrice(dto.getPrice());
         productUpdate.setImageUrl(dto.getImageUrl());
-        repository.update(id,productUpdate);
         return productUpdate;
     }
 
     @Transactional
     public void delete(Long id) {
-        repository.delete(id);
+        repository.deleteById(id);
     }
 }
