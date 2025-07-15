@@ -59,4 +59,3 @@ public class WishRepositoryTest {
         assertThat(foundMember.getWishes().get(0).getProduct().getName()).isEqualTo("상품1");
     }
 }
-

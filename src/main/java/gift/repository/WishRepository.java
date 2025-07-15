@@ -23,6 +23,5 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
     List<WishResponseDto> findWithProductByMember_Id(@Param("memberId") Long memberId);
 
     @Modifying
-    @Query("DELETE FROM Wish w WHERE w.id = :wishId AND w.member.id = :memberId")
-    int deleteByIdAndMember_Id(@Param("wishId") Long wishId, @Param("memberId") Long memberId);
+    int deleteByIdAndMemberId(Long wishId, Long memberId);
 }

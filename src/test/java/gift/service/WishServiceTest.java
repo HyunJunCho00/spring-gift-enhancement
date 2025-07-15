@@ -107,17 +107,17 @@ public class WishServiceTest {
     @Test
     void deleteWish_success() {
         Long wishId = 1L;
-        given(wishRepository.deleteByIdAndMember_Id(wishId, member.getId())).willReturn(1);
+        given(wishRepository.deleteByIdAndMemberId(wishId, member.getId())).willReturn(1);
 
         wishService.deleteWish(wishId, member);
 
-        verify(wishRepository).deleteByIdAndMember_Id(wishId, member.getId());
+        verify(wishRepository).deleteByIdAndMemberId(wishId, member.getId());
     }
 
     @Test
     void deleteWish_fail_unauthorized() {
         Long wishId = 1L;
-        given(wishRepository.deleteByIdAndMember_Id(wishId, member.getId())).willReturn(0);
+        given(wishRepository.deleteByIdAndMemberId(wishId, member.getId())).willReturn(0);
 
         assertThatThrownBy(() -> wishService.deleteWish(wishId, member))
                 .isInstanceOf(UnauthorizedWishAccessException.class);

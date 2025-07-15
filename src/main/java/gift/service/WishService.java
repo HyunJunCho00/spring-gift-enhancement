@@ -45,7 +45,7 @@ public class WishService {
 
     @Transactional
     public void deleteWish(Long wishId, Member member) {
-        int deletedCount = wishRepository.deleteByIdAndMember_Id(wishId, member.getId());
+        int deletedCount = wishRepository.deleteByIdAndMemberId(wishId, member.getId());
         if (deletedCount == 0) {
             throw new UnauthorizedWishAccessException("삭제 권한이 없거나 존재하지 않는 위시리스트 항목입니다.");
         }
