@@ -1,7 +1,5 @@
 package gift.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import gift.dto.LoginRequestDto;
 import gift.dto.MemberProfileDto;
 import gift.dto.RegisterRequestDto;
@@ -18,12 +16,14 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.jdbc.Sql;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -40,19 +40,20 @@ public class MemberServiceTest {
     private RegisterRequestDto registerRequestDto;
     private LoginRequestDto loginRequestDto;
     private Member member;
-    private String rawPassword="password";
+    private String rawPassword = "password";
+
     @BeforeEach
     void setUp() {
-        registerRequestDto=new RegisterRequestDto();
+        registerRequestDto = new RegisterRequestDto();
         registerRequestDto.setEmail("test@email.com");
         registerRequestDto.setPassword(rawPassword);
 
-        loginRequestDto=new LoginRequestDto();
+        loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail("test@email.com");
         loginRequestDto.setPassword(rawPassword);
 
-        String hashPassword= BCrypt.hashpw(rawPassword, BCrypt.gensalt());
-        member=new Member(1L,"test@email.com",hashPassword);
+        String hashPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        member = new Member(1L, "test@email.com", hashPassword);
     }
 
 
