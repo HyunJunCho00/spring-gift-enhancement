@@ -13,24 +13,24 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ProductService {
-    private final ProductRepository productrepository;
+    private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productrepository) {
-        this.productrepository = productrepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     public List<Product> getAll() {
-        return productrepository.findAll();
+        return productRepository.findAll();
     }
 
     public Product getById(Long id) {
-        return productrepository.findById(id)
+        return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("ID " + id + "에 해당하는 상품을 찾을 수 없습니다."));
     }
 
     @Transactional
     public Product create(CreateProductRequestDto dto) {
-        return productrepository.save(new Product(null, dto.getName(), dto.getPrice(), dto.getImageUrl()));
+        return productRepository.save(new Product(null, dto.getName(), dto.getPrice(), dto.getImageUrl()));
     }
 
     @Transactional
@@ -44,6 +44,6 @@ public class ProductService {
 
     @Transactional
     public void delete(Long id) {
-        productrepository.deleteById(id);
+        productRepository.deleteById(id);
     }
 }
