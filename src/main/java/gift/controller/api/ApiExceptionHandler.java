@@ -68,6 +68,7 @@ public class ApiExceptionHandler {
     public ErrorResponse handleWishAlreadyExists(WishAlreadyExistsException e) {
         return new ErrorResponse(e.getMessage());
     }
+
     @ExceptionHandler(UnauthorizedWishAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleUnauthorizedWishAccess(UnauthorizedWishAccessException e) {

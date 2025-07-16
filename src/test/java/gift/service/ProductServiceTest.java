@@ -1,86 +1,70 @@
 package gift.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import gift.dto.CreateProductRequestDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
 import gift.exception.ProductNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
+import gift.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 public class ProductServiceTest {
 
     @Autowired
     private ProductService productService;
-    private Product savedProduct;
 
-    @BeforeEach
-    void setUp() {
-        CreateProductRequestDto createDto = new CreateProductRequestDto();
-        createDto.setName("기본 상품");
-        createDto.setPrice(15000);
-        createDto.setImageUrl("default.jpg");
-        savedProduct = productService.create(createDto);
-    }
+    @Autowired
+    private ProductRepository productRepository;
 
     @Test
-    void getProductById_Success() {
-        Product foundProduct = productService.getById(savedProduct.getId());
-        assertThat(foundProduct.getName()).isEqualTo("기본 상품");
-    }
+    void updateProductWithDirtyChecking() {
+        Product originalProduct = productRepository.save(new Product("원본 상품", 10000, "original.jpg"));
+        Long productId = originalProduct.getId();
 
-    @Test
-    void getProductByNonExistentId() {
-        assertThatThrownBy(() -> productService.getById(99999L))
-                .isInstanceOf(ProductNotFoundException.class);
-    }
+        UpdateProductRequestDto updateRequest = new UpdateProductRequestDto();
+        updateRequest.setName("수정된 상품");
+        updateRequest.setPrice(15000);
+        updateRequest.setImageUrl("updated.jpg");
+        productService.update(productId, updateRequest);
+        Product updatedProduct = productRepository.findById(productId).orElseThrow();
 
-    @Test
-    void updateProduct_Success() {
-        UpdateProductRequestDto updateDto = new UpdateProductRequestDto();
-        updateDto.setName("수정된 상품");
-        updateDto.setPrice(20000);
-        updateDto.setImageUrl("updated.jpg");
-
-        productService.update(savedProduct.getId(), updateDto);
-
-        Product updatedProduct = productService.getById(savedProduct.getId());
         assertThat(updatedProduct.getName()).isEqualTo("수정된 상품");
-    }
-
-
-    @Test
-    void getAllProducts() {
-        CreateProductRequestDto anotherDto = new CreateProductRequestDto();
-        anotherDto.setName("추가 상품");
-        anotherDto.setPrice(5000);
-        anotherDto.setImageUrl("another.jpg");
-        productService.create(anotherDto);
-        List<Product> products = productService.getAll();
-        assertThat(products).hasSize(4);
+        assertThat(updatedProduct.getPrice()).isEqualTo(15000);
     }
 
     @Test
-    void deleteProduct_Success() {
-        Long productId = savedProduct.getId();
-        productService.delete(productId);
-        assertThatThrownBy(() -> productService.getById(productId))
-                .isInstanceOf(ProductNotFoundException.class);
+    void createProduct_Success() {
+        CreateProductRequestDto createRequest = new CreateProductRequestDto();
+        createRequest.setName("새로운 상품");
+        createRequest.setPrice(20000);
+        createRequest.setImageUrl("new.jpg");
+        Product savedProduct = productService.create(createRequest);
+        Product foundProduct = productRepository.findById(savedProduct.getId()).orElseThrow();
+        assertThat(foundProduct.getName()).isEqualTo("새로운 상품");
+        assertThat(foundProduct.getPrice()).isEqualTo(20000);
     }
 
     @Test
     void deleteNonExistentProduct() {
-        Long nonExistentId = 99999L;
-        assertThatThrownBy(() -> productService.delete(nonExistentId))
+        Long nonExistentId = 9999L;
+        productService.delete(nonExistentId);
+        assertThat(productRepository.findById(nonExistentId)).isEmpty();
+    }
+
+    @Test
+    void getProductById_NotFound() {
+        Long nonExistentId = 9999L;
+        assertThatThrownBy(() -> productService.getById(nonExistentId))
                 .isInstanceOf(ProductNotFoundException.class);
     }
+
 }

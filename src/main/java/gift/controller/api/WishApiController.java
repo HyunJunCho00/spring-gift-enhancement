@@ -18,6 +18,7 @@ import java.util.List;
 public class WishApiController {
 
     private final WishService wishService;
+
     public WishApiController(WishService wishService) {
         this.wishService = wishService;
     }
@@ -36,7 +37,7 @@ public class WishApiController {
     }
 
     @DeleteMapping("/{wishId}")
-    public ResponseEntity<Void> deleteWish( @PathVariable Long wishId, @LoginMember Member loginMember) {
+    public ResponseEntity<Void> deleteWish(@PathVariable Long wishId, @LoginMember Member loginMember) {
         wishService.deleteWish(wishId, loginMember);
         return ResponseEntity.noContent().build();
     }

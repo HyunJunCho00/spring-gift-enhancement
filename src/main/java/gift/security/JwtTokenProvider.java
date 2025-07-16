@@ -1,6 +1,5 @@
 package gift.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -32,6 +31,7 @@ public class JwtTokenProvider {
                 .signWith(key)
                 .compact();
     }
+
     public void validateToken(String token) throws JwtException {
         Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
     }
