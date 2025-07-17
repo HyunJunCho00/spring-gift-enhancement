@@ -94,6 +94,36 @@
             cursor: pointer;
             text-decoration: none;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+            list-style: none;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .pagination li.active a {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination li.disabled a {
+            color: #6c757d;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -108,37 +138,42 @@
     </form>
 </div>
 
-<ul id="wish-list" class="wish-list">
-</ul>
+<ul id="wish-list" class="wish-list"></ul>
+
+<!-- 페이지네이션 UI가 그려질 영역 -->
+<nav id="pagination-nav"></nav>
 
 <a id="logout-button" href="#">로그아웃</a>
 
 <script>
     const token = localStorage.getItem('accessToken');
     const wishListElement = document.getElementById('wish-list');
+    const paginationNavElement = document.getElementById('pagination-nav');
 
-    // 페이지 로드 시 실행
     window.onload = function () {
         if (!token) {
             alert('로그인이 필요합니다.');
             window.location.href = '/login';
             return;
         }
-        loadWishes();
+        loadWishes(0);
     };
 
-    async function loadWishes() {
+    async function loadWishes(pageNumber = 0) {
         try {
-            const response = await fetch('/api/wishes', {
+            const response = await fetch(`/api/wishes?page=${pageNumber}&size=10`, {
                 headers: {'Authorization': 'Bearer ' + token}
             });
             if (!response.ok) throw new Error('위시리스트를 불러오는데 실패했습니다.');
 
-            const wishes = await response.json();
-            wishListElement.innerHTML = ''; // 기존 목록 초기화
+            const pageData = await response.json();
+            const wishes = pageData.content;
+
+            wishListElement.innerHTML = '';
 
             if (wishes.length === 0) {
                 wishListElement.innerHTML = '<p>위시리스트가 비어있습니다.</p>';
+                renderPagination(null);
                 return;
             }
 
@@ -146,7 +181,7 @@
                 const item = document.createElement('li');
                 item.className = 'wish-item';
                 item.innerHTML = `
-                    <img src="${wish.productImageUrl}" alt="${wish.productName}" onerror="this.src='[https://placehold.co/60x60/eee/ccc?text=Image](https://placehold.co/60x60/eee/ccc?text=Image)'">
+                    <img src="${wish.productImageUrl}" alt="${wish.productName}" onerror="this.src='https://placehold.co/60x60/eee/ccc?text=Image'">
                     <div class="wish-item-info">
                         <strong>${wish.productName}</strong>
                         <p>${wish.productPrice.toLocaleString()}원</p>
@@ -155,10 +190,44 @@
                 `;
                 wishListElement.appendChild(item);
             });
+
+            renderPagination(pageData);
+
         } catch (error) {
             alert(error.message);
         }
     }
+
+    function renderPagination(pageData) {
+        paginationNavElement.innerHTML = '';
+        if (!pageData || pageData.totalPages <= 1) return;
+
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        const prevClass = pageData.first ? 'disabled' : '';
+        ul.innerHTML += `<li class="page-item ${prevClass}"><a class="page-link" data-page="${pageData.number - 1}">&laquo;</a></li>`;
+
+        for (let i = 0; i < pageData.totalPages; i++) {
+            const activeClass = i === pageData.number ? 'active' : '';
+            ul.innerHTML += `<li class="page-item ${activeClass}"><a class="page-link" data-page="${i}">${i + 1}</a></li>`;
+        }
+
+        const nextClass = pageData.last ? 'disabled' : '';
+        ul.innerHTML += `<li class="page-item ${nextClass}"><a class="page-link" data-page="${pageData.number + 1}">&raquo;</a></li>`;
+
+        paginationNavElement.appendChild(ul);
+    }
+
+    paginationNavElement.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A' && e.target.dataset.page) {
+            e.preventDefault();
+            const page = parseInt(e.target.dataset.page, 10);
+            if (!isNaN(page)) {
+                loadWishes(page);
+            }
+        }
+    });
 
     document.getElementById('add-wish-form').addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -187,6 +256,7 @@
             alert(error.message);
         }
     });
+
     wishListElement.addEventListener('click', async function (e) {
         if (e.target && e.target.classList.contains('wish-item-delete')) {
             const wishId = e.target.dataset.wishId;
@@ -210,6 +280,7 @@
             }
         }
     });
+
     document.getElementById('logout-button').addEventListener('click', function (e) {
         e.preventDefault();
         localStorage.removeItem('accessToken');

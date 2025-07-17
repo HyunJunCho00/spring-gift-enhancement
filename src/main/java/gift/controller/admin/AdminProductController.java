@@ -2,10 +2,15 @@ package gift.controller.admin;
 
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,8 +26,12 @@ public class AdminProductController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("products", productService.getAll());
+    public String getProductList(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model
+    ) {
+        Page<ProductResponseDto> productPage = productService.getAllProducts(pageable);
+        model.addAttribute("productPage", productPage);
         return "admin/products/list";
     }
 

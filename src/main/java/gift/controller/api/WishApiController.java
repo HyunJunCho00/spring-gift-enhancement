@@ -7,11 +7,14 @@ import gift.entity.Member;
 import gift.entity.Wish;
 import gift.service.WishService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/wishes")
@@ -31,8 +34,8 @@ public class WishApiController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WishResponseDto>> getWishes(@LoginMember Member loginMember) {
-        List<WishResponseDto> wishes = wishService.getWishesByMember(loginMember);
+    public ResponseEntity<Page<WishResponseDto>> getWishes(@LoginMember Member loginMember, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<WishResponseDto> wishes = wishService.getWishesByMember(loginMember, pageable);
         return ResponseEntity.ok(wishes);
     }
 
