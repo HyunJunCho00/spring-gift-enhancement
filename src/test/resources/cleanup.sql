@@ -1,1 +1,2 @@
-Delete from member;
+Delete
+from member;

@@ -17,6 +17,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -95,13 +99,15 @@ public class WishServiceTest {
 
     @Test
     void getWishes_success() {
+        Pageable pageable = PageRequest.of(0, 5);
         WishResponseDto wishDto = new WishResponseDto(1L, 100L, "테스트 상품", 10000, "test.jpg");
-        given(wishRepository.findWithProductByMember_Id(any(Long.class))).willReturn(List.of(wishDto));
-
-        List<WishResponseDto> result = wishService.getWishesByMember(member);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).productName()).isEqualTo("테스트 상품");
+        List<WishResponseDto> content = List.of(wishDto);
+        Page<WishResponseDto> wishPage = new PageImpl<>(content, pageable, 1);
+        given(wishRepository.findWithProductByMemberId(member.getId(), pageable)).willReturn(wishPage);
+        Page<WishResponseDto> resultPage = wishService.getWishesByMember(member, pageable);
+        assertThat(resultPage.getTotalElements()).isEqualTo(1);
+        assertThat(resultPage.getContent()).hasSize(1);
+        assertThat(resultPage.getContent().get(0).productName()).isEqualTo("테스트 상품");
     }
 
     @Test
