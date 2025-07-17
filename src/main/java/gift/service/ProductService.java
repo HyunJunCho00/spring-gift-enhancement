@@ -1,10 +1,13 @@
 package gift.service;
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
 import gift.exception.ProductNotFoundException;
 import gift.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,4 +49,10 @@ public class ProductService {
     public void delete(Long id) {
         productRepository.deleteById(id);
     }
+
+    public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return productPage.map(ProductResponseDto::from);
+    }
+
 }

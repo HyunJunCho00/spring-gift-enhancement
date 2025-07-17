@@ -16,6 +16,22 @@ public class ProductResponseDto {
 
     }
 
+    public ProductResponseDto(Long id, String name, int price, String imageUrl) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.imageUrl = imageUrl;
+    }
+
+    public static ProductResponseDto from(Product product) {
+        return new ProductResponseDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getImageUrl()
+        );
+    }
+
     public Long getId() {
         return id;
     }
