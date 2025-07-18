@@ -8,13 +8,6 @@ public class ProductResponseDto {
     private int price;
     private String imageUrl;
 
-    public ProductResponseDto(Product product) {
-        this.id = product.getId();
-        this.name = product.getName();
-        this.price = product.getPrice();
-        this.imageUrl = product.getImageUrl();
-
-    }
 
     public ProductResponseDto(Long id, String name, int price, String imageUrl) {
         this.id = id;
