@@ -1,6 +1,7 @@
 package gift.service;
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
 import gift.exception.ProductNotFoundException;
@@ -47,10 +48,11 @@ public class ProductServiceTest {
         createRequest.setName("새로운 상품");
         createRequest.setPrice(20000);
         createRequest.setImageUrl("new.jpg");
-        Product savedProduct = productService.create(createRequest);
-        Product foundProduct = productRepository.findById(savedProduct.getId()).orElseThrow();
+        ProductResponseDto savedProductDto = productService.create(createRequest);
+        assertThat(savedProductDto.getName()).isEqualTo("새로운 상품");
+        assertThat(savedProductDto.getPrice()).isEqualTo(20000);
+        Product foundProduct = productRepository.findById(savedProductDto.getId()).orElseThrow();
         assertThat(foundProduct.getName()).isEqualTo("새로운 상품");
-        assertThat(foundProduct.getPrice()).isEqualTo(20000);
     }
 
     @Test
