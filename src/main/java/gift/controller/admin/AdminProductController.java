@@ -4,7 +4,6 @@ package gift.controller.admin;
 import gift.dto.CreateProductRequestDto;
 import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
-import gift.entity.Product;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -37,8 +36,8 @@ public class AdminProductController {
 
     @GetMapping("/{id}")
     public String showDetail(@PathVariable Long id, Model model) {
-        Product product = productService.getById(id);
-        model.addAttribute("product", product);
+        ProductResponseDto productDto = productService.getById(id);
+        model.addAttribute("product", productDto);
         return "admin/products/detail";
     }
 
@@ -59,13 +58,13 @@ public class AdminProductController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        Product product = productService.getById(id);
-        UpdateProductRequestDto dto = new UpdateProductRequestDto();
-        dto.setName(product.getName());
-        dto.setPrice(product.getPrice());
-        dto.setImageUrl(product.getImageUrl());
+        ProductResponseDto productDto = productService.getById(id);
+        UpdateProductRequestDto updateDto = new UpdateProductRequestDto();
+        updateDto.setName(productDto.getName());
+        updateDto.setPrice(productDto.getPrice());
+        updateDto.setImageUrl(productDto.getImageUrl());
 
-        model.addAttribute("product", dto);
+        model.addAttribute("product", updateDto);
         model.addAttribute("productId", id);
         return "admin/products/edit";
     }

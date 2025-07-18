@@ -4,7 +4,6 @@ package gift.controller.api;
 import gift.dto.CreateProductRequestDto;
 import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
-import gift.entity.Product;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/products")
@@ -26,27 +24,24 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponseDto>> getAllProducts(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ProductResponseDto> productPage = productService.getAllProducts(pageable);
-        return ResponseEntity.ok(productPage);
+        return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> get(@PathVariable Long id) {
-        Product product = productService.getById(id);
-        return ResponseEntity.ok(new ProductResponseDto(product));
+        return ResponseEntity.ok(productService.getById(id));
     }
 
     @PostMapping
     public ResponseEntity<ProductResponseDto> create(@Valid @RequestBody CreateProductRequestDto dto) {
-        Product product = productService.create(dto);
-        return ResponseEntity.ok(new ProductResponseDto(product));
+        ProductResponseDto createdProduct = productService.create(dto);
+        return ResponseEntity.ok(createdProduct);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> update(@PathVariable Long id,
                                                      @Valid @RequestBody UpdateProductRequestDto requestDto) {
-        Product updatedProduct = productService.update(id, requestDto);
-        return ResponseEntity.ok(new ProductResponseDto(updatedProduct));
+        return ResponseEntity.ok(productService.update(id, requestDto));
     }
 
     @DeleteMapping("/{id}")
