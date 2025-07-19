@@ -1,7 +1,7 @@
 package gift.controller.admin;
 
 import gift.dto.CreateProductRequestDto;
-import gift.entity.Product;
+import gift.dto.ProductResponseDto;
 import gift.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ public class AdminProductControllerTest {
 
     @Autowired
     private ProductService productService;
-    private Product savedProduct;
+    private ProductResponseDto savedProduct;
 
     @BeforeEach
     void setUp() {

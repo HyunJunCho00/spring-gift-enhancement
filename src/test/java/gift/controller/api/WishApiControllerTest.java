@@ -67,7 +67,7 @@ public class WishApiControllerTest {
         mockMvc.perform(get("/api/wishes")
                         .header("Authorization", "Bearer " + userAToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].productId").value(101L));
+                .andExpect(jsonPath("$.content[0].productId").value(101L));
     }
 
     @Test

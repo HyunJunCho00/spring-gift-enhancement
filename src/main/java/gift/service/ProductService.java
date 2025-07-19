@@ -1,49 +1,55 @@
 package gift.service;
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
 import gift.exception.ProductNotFoundException;
 import gift.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class ProductService {
-    private final ProductRepository productrepository;
+    private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productrepository) {
-        this.productrepository = productrepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
-    public List<Product> getAll() {
-        return productrepository.findAll();
+    public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable).map(ProductResponseDto::from);
     }
 
-    public Product getById(Long id) {
-        return productrepository.findById(id)
+    public ProductResponseDto getById(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("ID " + id + "에 해당하는 상품을 찾을 수 없습니다."));
+        return ProductResponseDto.from(product);
     }
 
     @Transactional
-    public Product create(CreateProductRequestDto dto) {
-        return productrepository.save(new Product(null, dto.getName(), dto.getPrice(), dto.getImageUrl()));
+    public ProductResponseDto create(CreateProductRequestDto dto) {
+        Product product = new Product(dto.getName(), dto.getPrice(), dto.getImageUrl());
+        Product savedProduct = productRepository.save(product);
+        return ProductResponseDto.from(savedProduct);
     }
 
     @Transactional
-    public Product update(Long id, UpdateProductRequestDto dto) {
-        Product productUpdate = getById(id);
-        productUpdate.setName(dto.getName());
-        productUpdate.setPrice(dto.getPrice());
-        productUpdate.setImageUrl(dto.getImageUrl());
-        return productUpdate;
+    public ProductResponseDto update(Long id, UpdateProductRequestDto dto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("ID " + id + "에 해당하는 상품을 찾을 수 없습니다."));
+
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setImageUrl(dto.getImageUrl());
+        return ProductResponseDto.from(product);
     }
 
     @Transactional
     public void delete(Long id) {
-        productrepository.deleteById(id);
+        productRepository.deleteById(id);
     }
 }

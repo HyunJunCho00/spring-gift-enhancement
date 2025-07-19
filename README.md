@@ -43,3 +43,39 @@ JPA 리팩터링 이후에도 패키지 구조는 역할과 책임에 따라 명
 │       └── service      // @SpringBootTest를 사용한 서비스 통합 테스트
 └── resources
 └── application-test.properties // 테스트 전용 설정 파일
+
+
+## 🎁 주요 구현 내용
+
+1. 상품 및 위시리스트 페이지네이션 기능 구현
+   핵심 기능: 사용자가 상품 목록과 위시리스트를 조회할 때, 모든 데이터를 한 번에 불러오는 대신 페이지 단위로 나누어 볼 수 있도록 페이지네이션 기능을 구현했다.
+
+Spring Data JPA 활용: Pageable 객체를 사용하여 클라이언트로부터 페이지 번호(page), 페이지 크기(size), 정렬 기준(sort)을 파라미터로 받고, Page 객체를 통해 데이터 목록과 함께 전체 페이지 수 등의 메타데이터를 응답하도록 설계했다.
+
+2. 백엔드 계층별 페이지네이션 적용
+   Repository: findAll, @Query 등 조회 메서드의 반환 타입을 List에서 Page로 변경하고, Pageable을 파라미터로 받도록 수정했다. 특히 @Query에서는 countQuery를 함께 사용하여 성능을 최적화했다.
+
+Service: Repository로부터 받은 Page<Entity>를 Page<DTO>로 변환하는 로직을 추가하여, 컨트롤러에는 변환된 DTO 페이지만 전달하도록 책임을 분리했다.
+
+Controller: API 엔드포인트가 Pageable 파라미터를 받을 수 있도록 수정하고, @PageableDefault를 사용하여 기본 정렬 순서와 페이지 크기를 지정함으로써 API의 안정성을 높였다.
+
+3. 프론트엔드 UI 구현 및 테스트 강화
+   View (Thymeleaf & JavaScript): 컨트롤러로부터 전달받은 Page 객체의 정보(totalPages, number, first, last 등)를 활용하여, 페이지 번호와 '이전/다음' 버튼이 동적으로 생성되는 UI를 구현했다.
+
+통합 테스트: MockMvc를 사용하여 페이지네이션 관련 파라미터(page, size, sort)에 따라 API가 올바르게 동작하고, Page 객체 형식의 JSON을 정확히 반환하는지 검증하는 테스트 코드를 추가했다.
+
+## 📂 프로젝트 구조
+페이지네이션 구현 이후에도 패키지 구조는 역할과 책임에 따라 명확하게 유지된다. 다만, 각 계층의 메서드 시그니처가 Pageable과 Page를 사용하도록 변경되었다.
+
+└── src
+├── main
+│   └── java
+│       └── gift
+│           ├── controller   // @PageableDefault, Pageable 파라미터 사용
+│           ├── service      // Page<Entity> -> Page<DTO> 변환 책임
+│           └── repository   // Pageable을 파라미터로 받고 Page를 반환
+│
+└── test
+└── java
+└── gift
+└── controller   // MockMvc를 사용한 페이지네이션 API 테스트

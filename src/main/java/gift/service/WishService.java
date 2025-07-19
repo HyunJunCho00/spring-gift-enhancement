@@ -10,10 +10,11 @@ import gift.exception.UnauthorizedWishAccessException;
 import gift.exception.WishAlreadyExistsException;
 import gift.repository.ProductRepository;
 import gift.repository.WishRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,15 +40,15 @@ public class WishService {
         return wishRepository.save(wish);
     }
 
-    public List<WishResponseDto> getWishesByMember(Member member) {
-        return wishRepository.findWithProductByMember_Id(member.getId());
-    }
-
     @Transactional
     public void deleteWish(Long wishId, Member member) {
         int deletedCount = wishRepository.deleteByIdAndMemberId(wishId, member.getId());
         if (deletedCount == 0) {
             throw new UnauthorizedWishAccessException("삭제 권한이 없거나 존재하지 않는 위시리스트 항목입니다.");
         }
+    }
+
+    public Page<WishResponseDto> getWishesByMember(Member member, Pageable pageable) {
+        return wishRepository.findWithProductByMemberId(member.getId(), pageable);
     }
 }
