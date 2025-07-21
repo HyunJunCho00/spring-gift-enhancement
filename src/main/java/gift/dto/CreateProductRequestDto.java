@@ -1,9 +1,13 @@
 package gift.dto;
 
 import gift.validation.ValidProductName;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public class CreateProductRequestDto {
     @NotBlank(message = "상품명을 입력하세요.")
@@ -16,6 +20,10 @@ public class CreateProductRequestDto {
 
     @NotBlank(message = "이미지 URL을 입력하세요.")
     private String imageUrl;
+
+    @Valid
+    @NotEmpty(message = "상품에는 최소 하나 이상의 옵션이 필요합니다.")
+    private List<OptionRequestDto> options;
 
     public String getName() {
         return name;
@@ -41,5 +49,12 @@ public class CreateProductRequestDto {
         this.imageUrl = imageUrl;
     }
 
+    public List<OptionRequestDto> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<OptionRequestDto> options) {
+        this.options = options;
+    }
 }
 
