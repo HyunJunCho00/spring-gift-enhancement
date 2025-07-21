@@ -79,3 +79,50 @@ Controller: API 엔드포인트가 Pageable 파라미터를 받을 수 있도록
 └── java
 └── gift
 └── controller   // MockMvc를 사용한 페이지네이션 API 테스트
+
+🎁 주요 구현 내용
+1. 상품 옵션 기능 구현 및 도메인 모델 고도화
+   객체지향적 엔티티 설계: Option 엔티티를 새로 설계하고 Product와 1:N 연관관계를 매핑했다. 특히, 옵션의 재고를 차감하는 subtractQuantity() 비즈니스 로직을 서비스 계층이 아닌 Option 엔티티 내부에 직접 구현하여, 엔티티가 스스로의 상태와 행위를 책임지는 객체지향적인 도메인 모델로 개선했다.
+
+견고한 비즈니스 규칙 적용:
+
+@Table(uniqueConstraints = ...)를 사용하여 동일 상품 내 옵션 이름이 중복되지 않도록 복합 유니크 키 제약조건을 데이터베이스 레벨에서 설정했다.
+
+@Pattern, @Min, @Max 등 Bean Validation 어노테이션을 활용하여 옵션명과 수량에 대한 제약조건을 코드 레벨에서부터 검증했다.
+
+상품 생성 시 반드시 하나 이상의 옵션을 포함하도록 서비스 로직과 DTO를 수정하여, **"상품에는 항상 하나 이상의 옵션이 있어야 한다"**는 요구사항을 만족시켰다.
+
+API 및 관리자 UI 확장:
+
+GET /api/products/{productId}/options: 특정 상품에 속한 모든 옵션 목록을 조회하는 API를 구현했다.
+
+관리자가 상품 상세 페이지에서 직접 옵션을 확인하고, 새로운 옵션을 추가할 수 있도록 AdminProductController와 detail.html 뷰를 확장했다.
+
+단위/통합 테스트:
+
+@DataJpaTest를 사용하여 Option 엔티티의 subtractQuantity() 비즈니스 로직과 복합 유니크 키 제약조건이 올바르게 동작하는지 단위 테스트로 검증했다.
+
+MockMvc를 사용하여 새로 추가된 옵션 조회 API가 명세에 맞게 동작하는지 통합 테스트를 통해 검증했다.
+
+📂 프로젝트 구조
+상품 옵션 기능이 추가되면서, Option 관련 엔티티, DTO, Repository가 새로 추가되었다.
+
+└── src
+├── main
+│   └── java
+│       └── gift
+│           ├── ...
+│           ├── dto
+│           │   ├── OptionRequestDto.java   // 옵션 생성/수정 요청 DTO
+│           │   └── OptionResponseDto.java  // 옵션 조회 응답 DTO
+│           ├── entity
+│           │   ├── Product.java  // Option 과 1:N 연관관계 설정
+│           │   └── Option.java   // 옵션 엔티티 (비즈니스 로직 포함)
+│           ├── repository
+│           │   └── OptionRepository.java
+│           └── service      // 상품 생성 시 옵션 필수 포함 로직 추가
+│
+└── test
+└── java
+└── gift
+└── repository   // @DataJpaTest를 사용한 Option 엔티티 테스트
