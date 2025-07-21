@@ -78,32 +78,32 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        ProductResponseDto productDto = productService.getById(id);
+    @GetMapping("/{productId}/edit")
+    public String showEditForm(@PathVariable Long productId, Model model) {
+        ProductResponseDto productDto = productService.getById(productId);
         UpdateProductRequestDto updateDto = new UpdateProductRequestDto();
         updateDto.setName(productDto.getName());
         updateDto.setPrice(productDto.getPrice());
         updateDto.setImageUrl(productDto.getImageUrl());
 
         model.addAttribute("product", updateDto);
-        model.addAttribute("productId", id);
+        model.addAttribute("productId", productId);
         return "admin/products/edit";
     }
 
-    @PostMapping("/{id}/edit")
-    public String update(@PathVariable Long id, @Valid @ModelAttribute("product") UpdateProductRequestDto dto, BindingResult bindingResult, Model model) {
+    @PostMapping("/{productId}/edit")
+    public String update(@PathVariable Long productId, @Valid @ModelAttribute("product") UpdateProductRequestDto dto, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("productId", id);
+            model.addAttribute("productId", productId);
             return "admin/products/edit";
         }
-        productService.update(id, dto);
+        productService.update(productId, dto);
         return "redirect:/admin/products";
     }
 
-    @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id) {
-        productService.delete(id);
+    @PostMapping("/{productId}/delete")
+    public String delete(@PathVariable Long productId) {
+        productService.delete(productId);
         return "redirect:/admin/products";
     }
 }

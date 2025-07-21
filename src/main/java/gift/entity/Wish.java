@@ -52,4 +52,3 @@ public class Wish {
         this.product = product;
     }
 }
-

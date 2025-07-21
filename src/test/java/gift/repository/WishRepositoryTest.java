@@ -42,7 +42,7 @@ public class WishRepositoryTest {
 
     @Test
     void findWishesFromMember() {
-        Member member = new Member("user@example.com", "password");
+        Member member = new Member("unique@example.com", "password");
         Product product1 = productRepository.save(new Product("상품1", 1000, "1.jpg"));
         Product product2 = productRepository.save(new Product("상품2", 2000, "2.jpg"));
 

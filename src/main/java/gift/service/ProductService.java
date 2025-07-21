@@ -26,9 +26,8 @@ public class ProductService {
     }
 
     public List<OptionResponseDto> getOptionsByProductId(Long productId) {
-        if (!productRepository.existsById(productId)) {
-            throw new ProductNotFoundException("상품을 찾을 수 없습니다: " + productId);
-        }
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("상품을 찾을 수 없습니다: " + productId));
         return optionRepository.findByProductId(productId).stream()
                 .map(OptionResponseDto::from)
                 .collect(Collectors.toList());
