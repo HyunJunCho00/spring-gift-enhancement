@@ -1,9 +1,7 @@
 package gift.controller.admin;
 
 
-import gift.dto.CreateProductRequestDto;
-import gift.dto.ProductResponseDto;
-import gift.dto.UpdateProductRequestDto;
+import gift.dto.*;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -14,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -37,7 +37,10 @@ public class AdminProductController {
     @GetMapping("/{id}")
     public String showDetail(@PathVariable Long id, Model model) {
         ProductResponseDto productDto = productService.getById(id);
+        List<OptionResponseDto> options = productService.getOptionsByProductId(id);
         model.addAttribute("product", productDto);
+        model.addAttribute("options", options);
+        model.addAttribute("newOption", new OptionRequestDto());
         return "admin/products/detail";
     }
 
@@ -45,6 +48,25 @@ public class AdminProductController {
     public String showCreateForm(Model model) {
         model.addAttribute("product", new CreateProductRequestDto());
         return "admin/products/new";
+    }
+
+    @PostMapping("/{productId}/options")
+    public String addOption(
+            @PathVariable("productId") Long productId,
+            @Valid @ModelAttribute("newOption") OptionRequestDto optionDto,
+            BindingResult bindingResult,
+            Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            ProductResponseDto productDto = productService.getById(productId);
+            List<OptionResponseDto> options = productService.getOptionsByProductId(productId);
+            model.addAttribute("product", productDto);
+            model.addAttribute("options", options);
+            return "admin/products/detail";
+        }
+
+        productService.addOptionToProduct(productId, optionDto);
+        return "redirect:/admin/products/" + productId;
     }
 
     @PostMapping

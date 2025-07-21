@@ -3,35 +3,129 @@
 <head>
     <meta charset="UTF-8"/>
     <title>상품 상세 보기</title>
+    <!-- (Optional) Add some basic styling for better looks -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2em;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        hr {
+            margin: 40px 0;
+        }
+
+        form div {
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        .button-group a, .button-group button {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
-<h1>상품 상세 정보</h1>
+<div class="container">
+    <h1>상품 상세 정보</h1>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <td th:text="${product.id}"></td>
-    </tr>
-    <tr>
-        <th>이름</th>
-        <td th:text="${product.name}"></td>
-    </tr>
-    <tr>
-        <th>가격</th>
-        <td th:text="${product.price}"></td>
-    </tr>
-    <tr>
-        <th>이미지</th>
-        <td><img th:src="${product.imageUrl}" width="200" alt="이미지"/></td>
-    </tr>
-</table>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <td th:text="${product.id}"></td>
+        </tr>
+        <tr>
+            <th>이름</th>
+            <td th:text="${product.name}"></td>
+        </tr>
+        <tr>
+            <th>가격</th>
+            <td th:text="${product.price}"></td>
+        </tr>
+        <tr>
+            <th>이미지</th>
+            <td><img th:src="${product.imageUrl}" width="200" alt="이미지"/></td>
+        </tr>
+    </table>
 
-<br/>
-<a th:href="@{/admin/products}">← 목록으로 돌아가기</a>
-<a th:href="@{'/admin/products/' + ${product.id} + '/edit'}">수정</a>
-<form th:action="@{'/admin/products/' + ${product.id} + '/delete'}" method="post" style="display:inline;">
-    <button type="submit">삭제</button>
-</form>
+    <hr>
 
+    <!-- 1. (핵심 추가) 상품 옵션 목록을 보여주는 테이블 -->
+    <h2>상품 옵션 목록</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>옵션 ID</th>
+            <th>옵션명</th>
+            <th>수량</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 컨트롤러에서 받은 'options' 리스트를 반복하여 출력합니다. -->
+        <tr th:each="option : ${options}">
+            <td th:text="${option.id}">1</td>
+            <td th:text="${option.name}">옵션명</td>
+            <td th:text="${option.quantity}">100</td>
+        </tr>
+        <!-- 옵션이 없을 경우 메시지를 보여줍니다. -->
+        <tr th:if="${#lists.isEmpty(options)}">
+            <td colspan="3" style="text-align: center;">등록된 옵션이 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- 2. (핵심 추가) 새로운 옵션을 추가하는 입력 폼 -->
+    <h2>새 옵션 추가</h2>
+    <!-- th:action으로 요청을 보낼 URL을, th:object로 폼 데이터를 담을 객체를 지정합니다. -->
+    <form th:action="@{/admin/products/{productId}/options(productId=${product.id})}" th:object="${newOption}"
+          method="post">
+        <div>
+            <label for="name">옵션명:</label><br>
+            <input type="text" id="name" th:field="*{name}" style="width: 98%; padding: 5px;"/>
+            <!-- 유효성 검사 에러가 있을 경우, 해당 에러 메시지를 보여줍니다. -->
+            <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</div>
+        </div>
+        <div>
+            <label for="quantity">수량:</label><br>
+            <input type="number" id="quantity" th:field="*{quantity}" style="width: 98%; padding: 5px;"/>
+            <div class="error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">Quantity Error</div>
+        </div>
+        <button type="submit" style="padding: 10px 15px;">옵션 추가</button>
+    </form>
+
+    <br/>
+    <div class="button-group">
+        <a th:href="@{/admin/products}">← 목록으로 돌아가기</a>
+        <a th:href="@{'/admin/products/' + ${product.id} + '/edit'}">수정</a>
+        <form th:action="@{'/admin/products/' + ${product.id} + '/delete'}" method="post" style="display:inline;">
+            <button type="submit">삭제</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

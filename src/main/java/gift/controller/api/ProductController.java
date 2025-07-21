@@ -1,9 +1,7 @@
 package gift.controller.api;
 
 
-import gift.dto.CreateProductRequestDto;
-import gift.dto.ProductResponseDto;
-import gift.dto.UpdateProductRequestDto;
+import gift.dto.*;
 import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -13,13 +11,33 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+
     private final ProductService productService;
 
     public ProductController(ProductService productService) {
         this.productService = productService;
+    }
+
+    @GetMapping("/{productId}/options")
+    public ResponseEntity<List<OptionResponseDto>> getOptionsByProduct(@PathVariable("productId") Long productId) {
+        List<OptionResponseDto> options = productService.getOptionsByProductId(productId);
+        return ResponseEntity.ok(options);
+    }
+
+    @PostMapping("/{productId}/options")
+    public ResponseEntity<OptionResponseDto> addOptionToProduct(
+            @PathVariable("productId") Long productId,
+            @Valid @RequestBody OptionRequestDto optionDto
+    ) {
+        OptionResponseDto savedOption = productService.addOptionToProduct(productId, optionDto);
+        URI location = URI.create("/api/products/" + productId + "/options/" + savedOption.id());
+        return ResponseEntity.created(location).body(savedOption);
     }
 
     @GetMapping
