@@ -22,3 +22,12 @@ CREATE TABLE wish
     FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE,
     UNIQUE (member_id, product_id)
 );
+CREATE TABLE product_options
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name       VARCHAR(50) NOT NULL,
+    quantity   INT         NOT NULL,
+    product_id BIGINT      NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE,
+    UNIQUE (product_id, name)
+);
