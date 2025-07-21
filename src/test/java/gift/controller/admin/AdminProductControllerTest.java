@@ -1,6 +1,7 @@
 package gift.controller.admin;
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.OptionRequestDto;
 import gift.dto.ProductResponseDto;
 import gift.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,10 +34,16 @@ public class AdminProductControllerTest {
 
     @BeforeEach
     void setUp() {
+        OptionRequestDto optionDto = new OptionRequestDto();
+        optionDto.setName("테스트 옵션");
+        optionDto.setQuantity(10);
+
         CreateProductRequestDto createDto = new CreateProductRequestDto();
         createDto.setName("테스트용 상품");
         createDto.setPrice(10000);
         createDto.setImageUrl("test.jpg");
+        createDto.setOptions(List.of(optionDto));
+
         savedProduct = productService.create(createDto);
     }
 

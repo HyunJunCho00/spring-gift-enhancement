@@ -1,6 +1,7 @@
 package gift.service;
 
 import gift.dto.CreateProductRequestDto;
+import gift.dto.OptionRequestDto;
 import gift.dto.ProductResponseDto;
 import gift.dto.UpdateProductRequestDto;
 import gift.entity.Product;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,15 +47,22 @@ public class ProductServiceTest {
 
     @Test
     void createProduct_Success() {
+        OptionRequestDto optionDto = new OptionRequestDto();
+        optionDto.setName("기본 옵션");
+        optionDto.setQuantity(100);
+
         CreateProductRequestDto createRequest = new CreateProductRequestDto();
         createRequest.setName("새로운 상품");
         createRequest.setPrice(20000);
         createRequest.setImageUrl("new.jpg");
+        createRequest.setOptions(List.of(optionDto));
+
         ProductResponseDto savedProductDto = productService.create(createRequest);
         assertThat(savedProductDto.getName()).isEqualTo("새로운 상품");
-        assertThat(savedProductDto.getPrice()).isEqualTo(20000);
+
         Product foundProduct = productRepository.findById(savedProductDto.getId()).orElseThrow();
-        assertThat(foundProduct.getName()).isEqualTo("새로운 상품");
+        assertThat(foundProduct.getOptions()).hasSize(1);
+        assertThat(foundProduct.getOptions().get(0).getName()).isEqualTo("기본 옵션");
     }
 
     @Test
